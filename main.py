@@ -1,4 +1,3 @@
-
 from tkinter import *
 from tkinter import messagebox
 from tkinter import ttk
@@ -9,17 +8,21 @@ import time
 import customtkinter
 from customtkinter import *
 from heapq import *
+import os
+import webbrowser
 
 # initialize main window
 root = customtkinter.CTk()
-#root = cTk()
-root.geometry("740x560")
+# root = cTk()
+root.geometry("760x650")
 root.title('Pathfinding Algorithm Visualizer By Raghav Dube')
-root.maxsize(740, 560)
-#.config(bg='black')
+root.maxsize(760, 650)
+root.resizable(FALSE,FALSE)
+# .config(bg='black')
+customtkinter.set_appearance_mode("System")
 
 font = ("Helvetica", 11)
-
+color_white="#e7ecef"
 # Variables
 selected_alg = StringVar()
 selected_bld = StringVar()
@@ -29,13 +32,16 @@ grid = []
 
 # frame layout - for user interface
 
-UI_frame = Frame(root, width=600, height=200, bg='#22577a')
-UI_frame.grid(row=0, column=0, padx=10, pady=5)
+UI_frame = customtkinter.CTkFrame(root, width=600, height=200)
+UI_frame.grid(row=0, column=0, padx=10, pady=5, sticky="nsew")
+
 
 # create canvas
 canvas = Canvas(root, width=WIDTH, height=WIDTH, bg='white')
 canvas.grid(row=0, column=1, padx=10, pady=5)
 
+img_logo = PhotoImage(file='logo.png')
+root.iconphoto(False, img_logo)
 
 # define class - spot
 class Spot:
@@ -49,7 +55,7 @@ class Spot:
 
         self.button = Button(canvas,
                              command=lambda a=row, b=col: self.click(a, b),
-                             bg='white', bd=2, relief=GROOVE
+                             bg='#eae2b7', bd=2, relief=GROOVE
                              )
 
         self.row = row
@@ -88,7 +94,7 @@ class Spot:
         self.clicked = True
 
     def reset(self):
-        self.button.config(bg="white")
+        self.button.config(bg="#eae2b7")
         self.clicked = False
 
     def make_path(self):
@@ -113,7 +119,7 @@ class Spot:
         self.button.config(state=NORMAL)
 
     def circle(self):
-        return  (self.row * WIDTH + 1, self.col * WIDTH + 1, WIDTH - 2, WIDTH - 2)
+        return (self.row * WIDTH + 1, self.col * WIDTH + 1, WIDTH - 2, WIDTH - 2)
 
     def click(self, row, col):
         if self.clicked == False:
@@ -345,6 +351,7 @@ def breadth_first(grid, tickTime):
 
     return False
 
+
 def depth_first(grid, tickTime):
     start = grid[Spot.start_point[1]][Spot.start_point[0]]
     end = grid[Spot.end_point[1]][Spot.end_point[0]]
@@ -387,6 +394,7 @@ def depth_first(grid, tickTime):
 
     return False
 
+
 def dijkstra(grid, tickTime):
     count = 0
     start = grid[Spot.start_point[1]][Spot.start_point[0]]
@@ -402,7 +410,7 @@ def dijkstra(grid, tickTime):
     start.g = 0
 
     # calculate f_score for start using heuristic function
-    #start.f = count +1
+    # start.f = count +1
 
     # create a dict to keep track of spots in open_set, can't check PriorityQueue
     open_set_hash = {start}
@@ -442,7 +450,7 @@ def dijkstra(grid, tickTime):
                 # update g_score for this spot and keep track of new best path
                 neighbor.parent = current
                 neighbor.g = temp_g_score
-                #neighbor.f = temp_g_score + h(neighbor, end)
+                # neighbor.f = temp_g_score + h(neighbor, end)
 
                 if neighbor not in open_set_hash:
                     # count the step
@@ -464,6 +472,7 @@ def dijkstra(grid, tickTime):
     messagebox.showinfo("No Solution", "There was no solution")
 
     return False
+
 
 # start pathfinding
 def StartAlgorithm():
@@ -493,11 +502,11 @@ def StartAlgorithm():
     # choose algorithm
     if algMenu.get() == 'A-star Algorithm':
         a_star(grid, speedScale.get())
-    elif algMenu.get() == 'Breadth-First Algorithm':
+    elif algMenu.get() == 'BFS Algorithm':
         breadth_first(grid, speedScale.get())
-    elif algMenu.get() =='Depth-First Algorithm':
+    elif algMenu.get() == 'DFS Algorithm':
         depth_first(grid, speedScale.get())
-    elif algMenu.get() =="Dijkstra's Algorithm":
+    elif algMenu.get() == "Dijkstra's Algorithm":
         dijkstra(grid, speedScale.get())
 
         # enable buttons in the grid
@@ -722,6 +731,7 @@ def build_maze():
     elif bldMenu.get() == 'Carved out maze':
         carve_out(grid, ROWS, speedScale.get())
 
+
     # enable buttons in the grid
     for row in grid:
         for spot in row:
@@ -737,6 +747,21 @@ def scale_action(event):
     else:
         wallsScale.configure(state='disable')
 
+def ins_menu_get(val:str):
+    if val=="Instructions":
+        instructions()
+    elif val=="About Me":
+        openNewwindow()
+    elif val=="Learn":
+        run()
+    elif val=="Website":
+        open_website()
+
+def run():
+    os.system("Learn_Page.py")
+
+def open_website():
+          webbrowser.open("https://www.google.com")
 
 def instructions():
     messagebox.showinfo("Instructions", "1. Create a maze by clicking on the grid or choose\n"
@@ -747,55 +772,87 @@ def instructions():
                                         "2. Choose one of four algorithms to find the shortest path\n"
                                         "     and visualize the search with desired speed of animation\n"
                                         "\n"
-                                        "3. Reset the grid if necessary")
+                                        "3. Reset the grid if necessary\n"
+                                        "\n"
+                                        "4. For learning these algorithms you can visit the website or\n"
+                                        "     simply navigate to Instructions --> Learn\n")
 
 
 # User interface area
-bldMenu = ttk.Combobox(UI_frame, textvariable=selected_bld,
-                       values=['Random walls', 'Circular maze', 'Carved out maze'], font=font)
-bldMenu.grid(row=0, column=0, padx=5, pady=(10, 5))
-bldMenu.current(0)
+
+customtkinter.CTkLabel(UI_frame, text="PATHFINDING\nVISUALIZER", font=("Helvetica", 18)).grid(row=2, column=0, padx=5, pady=(20, 5))
+
+bldMenu = customtkinter.CTkComboBox(UI_frame,
+                       values=['Random walls', 'Circular maze', 'Carved out maze'],width=150, font=("Helvetica", 13), fg_color="#f1faee", border_color="#f1faee",
+                                    dropdown_fg_color="#f1faee", dropdown_hover_color="Yellow", text_color="Black", dropdown_text_color="Black"
+                                    ,button_color="#f1faee")
+bldMenu.grid(row=3, column=0, padx=5, pady=(15,5))
+
+
 bldMenu.bind("<<ComboboxSelected>>", scale_action)
-wallsScale = Scale(UI_frame, from_=10, to=40, resolution=5, orient=HORIZONTAL,
-                   label='Wall density', font=font, length=180)
-wallsScale.grid(row=1, column=0, padx=5, pady=5, sticky=W)
-Button(UI_frame, text='Build maze', command=build_maze, font=("Helvetica", 14),
-       bg='pale green').grid(row=2, column=0, padx=5, pady=(10, 20))
 
-algMenu = ttk.Combobox(UI_frame, textvariable=selected_alg,
-                       values=['A-star Algorithm', 'Breadth-First Algorithm', 'Depth-First Algorithm',"Dijkstra's Algorithm"], font=font)
-algMenu.grid(row=3, column=0, padx=5, pady=(20, 5), sticky=W)
-algMenu.current(0)
-speedScale = Scale(UI_frame, from_=0.0, to=0.5, digits=2, resolution=0.05,
-                   orient=HORIZONTAL, label='Speed', font=font, length=180)
-speedScale.grid(row=4, column=0, padx=5, pady=(5, 5), sticky=W)
-Button(UI_frame, text='Start Search', command=StartAlgorithm, font=("Helvetica", 14),
-       bg='light salmon').grid(row=5, column=0, padx=5, pady=(10, 10))
+customtkinter.CTkLabel(UI_frame, text="Wall Density:", font=("Helvetica", 12)).grid(row=6, column=0, padx=5, pady=(5, 5))
+wallsScale = customtkinter.CTkSlider(UI_frame, from_=10, to=40, number_of_steps=8
+                  )
+wallsScale.grid(row=7, column=0, padx=5, pady=5, sticky=W)
 
-Button(UI_frame, text='Reset', command=Reset, font=("Helvetica", 14),
-       bg='white').grid(row=6, column=0, padx=5, pady=(20, 30))
 
-Button(UI_frame, text='Instructions', command=instructions, font=("Helvetica", 9),
-       bg='white').grid(row=7, column=0, padx=5, pady=(10, 10))
+customtkinter.CTkButton(UI_frame, text='Build maze', command=build_maze, font=("Helvetica", 14), fg_color="#ffb703",hover_color="#e9c46a",text_color="Black"
+      ).grid(row=8, column=0, padx=5, pady=(10, 20))
+
+customtkinter.CTkLabel(UI_frame, text="=================", font=("Helvetica", 18)).grid(row=9, column=0, padx=5, pady=(20, 5))
+
+algMenu = customtkinter.CTkComboBox(UI_frame,
+                       values=['A-star Algorithm', 'BFS Algorithm', 'DFS Algorithm',
+                               "Dijkstra's Algorithm"] , width=150,font=("Helvetica", 13), fg_color="#f1faee", border_color="#f1faee",
+                                    dropdown_fg_color="#f1faee", dropdown_hover_color="Yellow", text_color="Black", dropdown_text_color="Black"
+                                    ,button_color="#f1faee")
+algMenu.grid(row=10, column=0, padx=5, pady=(20, 5))
+
+
+customtkinter.CTkLabel(UI_frame, text="Speed:", font=("Helvetica", 12)).grid(row=11, column=0, padx=5, pady=(5, 5))
+speedScale = customtkinter.CTkSlider(UI_frame, from_=0, to=0.08, number_of_steps=6)
+speedScale.grid(row=13, column=0, padx=5, pady=(5, 5),sticky=W)
+
+
+customtkinter.CTkButton(UI_frame, text='Start Search', command=StartAlgorithm ,font=("Helvetica", 14),fg_color="#ffb703",hover_color="#e9c46a",text_color="Black"
+       ).grid(row=14, column=0, padx=5, pady=(10, 20))
+
+customtkinter.CTkButton(UI_frame, text='Reset', command=Reset, font=("Helvetica", 14),fg_color="#48cae4",text_color="Black",hover_color="#ade8f4"
+       ).grid(row=18, column=0, padx=5, pady=(20, 30))
+
 
 
 def openNewwindow():
     newWindow = Toplevel()
     newWindow.title("About Us")
-    newWindow.geometry("360x160")
-    Label(newWindow,text="              1. This GUI was made using Python (Tkinter, CustomTkinter) modules.\n"
-                                        "    follow the steps for installation of all modules.\n"
-                                        "\n"
-                                        "    Contact (G-mail): raghav.22111348@viit.ac.in\n"
-                                        "\n"
-                                        "2. This is an open source project which can be altered accordingly.\n"
-                                        "     Future work for this program is to add more DSAs into the GUI.\n"
-                                        "\n"
-                                        "3. Thank you for using. HAVE FUN!:)").pack()
+    newWindow.geometry("450x200")
+    newWindow.maxsize(450, 200)
+    Label(newWindow, text="              1. This GUI was made using Python (Tkinter, CustomTkinter) modules.\n"
+                          "  follow the steps for installation of all modules.\n"
+                          "\n"
+                          "    Contact (G-mail): raghav.22111348@viit.ac.in\n"
+                          "\n"
+                          "2. This is an open source project which can be altered accordingly.\n"
+                          "   Future work for this program is to add more DSAs into the GUI.\n"
+                          "\n"
+                          "3. To know more about this Algorithm Visualizer, visit my GitHub or\n"
+                          "    you can simply check out the website.\n"
+                          "\n"
+                          "4. Thank you for using. HAVE FUN!  :)").pack(side=LEFT)
+
+    img_logo1= PhotoImage(file='logo.png')
+    newWindow.iconphoto(False, img_logo1)
+
+ins_menu=customtkinter.CTkOptionMenu(UI_frame, values=["Instructions","Website", "Learn", "About Me"],
+                                                                    command=ins_menu_get)
+ins_menu.grid(row=20, column=0, padx=20, pady=(10, 10))
+ins_menu.set(value="Important")
 
 
-Button(UI_frame, text='About Us', command=openNewwindow, font=("Helvetica", 9),
-       bg='Pink').grid(row=8, column=0, padx=5, pady=(10, 10))
+main_button_1 = customtkinter.CTkButton(UI_frame,text="Learn",command=run ,fg_color="transparent", border_width=2, text_color=("gray10", "#DCE4EE"))
+main_button_1.grid(row=19, column=0, padx=20, pady=(5, 5),sticky="ns")
+
 
 # Create grid
 grid = make_grid(WIDTH, ROWS)
